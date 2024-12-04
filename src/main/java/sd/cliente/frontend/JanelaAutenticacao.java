@@ -151,7 +151,7 @@ public class JanelaAutenticacao extends JDialog {
             if (controlador.cadastrar(RA, senha, nome))
                 JOptionPane.showMessageDialog(null, "Cadastrado com sucesso!", "Aviso", JOptionPane.INFORMATION_MESSAGE);
             else
-                JOptionPane.showMessageDialog(null, "Cadastro falhou.", "Erro", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "RA já cadastrado.", "Erro", JOptionPane.ERROR_MESSAGE);
 
         });
 

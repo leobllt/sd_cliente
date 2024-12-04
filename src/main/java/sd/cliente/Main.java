@@ -21,17 +21,12 @@ public class Main{
         }
         janelaConexao = null; // Desalocando
 
-        // Loop do programa
-        while(true) {
-            // Autenticando
-            JanelaAutenticacao janelaAutenticacao = new JanelaAutenticacao(controlador);
-            if (!janelaAutenticacao.ok()) break;
-            janelaAutenticacao = null; // Desalocando
+        // Autenticando
+        JanelaAutenticacao janelaAutenticacao = new JanelaAutenticacao(controlador);
+        if (janelaAutenticacao.ok())
+            new JanelaPrincipal(controlador); // Programa em si
 
-            // Programa em si
-            new JanelaPrincipal(controlador);
-        }
-
+        janelaAutenticacao = null; // Desalocando
         controlador.desconectar();
     }
 }

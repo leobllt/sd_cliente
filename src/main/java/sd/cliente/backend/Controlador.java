@@ -72,7 +72,7 @@ public class Controlador {
         if(resposta == null) return false;
 
         // EDITAR PARA ANALISAR DEMAIS RESPONSES
-        return resposta.getResponse().equals("111");
+        return resposta.getResponse().equals("100");
     }
 
     // public boolean ler()            op3
@@ -91,12 +91,8 @@ public class Controlador {
         return true;
     }
 
-    public boolean deslogar(){
-        Mensagem requisicao = new Mensagem(6, null, null, null, usuario.getToken(), null, null);
-        Mensagem resposta = this.requisitar(requisicao);
-        if(resposta == null) return false;
-
-        return resposta.getResponse().equals("001");
+    public void deslogar(){
+        this.requisitar(new Mensagem(6, null, null, null, usuario.getToken(), null, null));
     }
 
     public Usuario getUsuario() {
