@@ -67,7 +67,7 @@ public class JanelaAutenticacao extends JDialog {
         btnLogin.setForeground(Color.WHITE);
         btnLogin.setFocusPainted(false);
         btnLogin.setPreferredSize(new Dimension(50, 30));
-        btnLogin.addActionListener(_ -> {
+        btnLogin.addActionListener(z -> {
             // Validar dados
             String RA = inputLoginRA.getText();
             String senha = new String(inputLoginSenha.getPassword());
@@ -128,7 +128,7 @@ public class JanelaAutenticacao extends JDialog {
         btnCadastro.setForeground(Color.WHITE);
         btnCadastro.setFocusPainted(false);
         btnCadastro.setPreferredSize(new Dimension(50, 30));
-        btnCadastro.addActionListener(_ -> {
+        btnCadastro.addActionListener(z -> {
             // Validar dados
             String RA = inputCadastroRA.getText();
             String senha = new String(inputCadastroSenha.getPassword());

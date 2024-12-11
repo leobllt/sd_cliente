@@ -61,7 +61,7 @@ public class JanelaPrincipal extends JDialog{
         botaoLogout.setForeground(Color.WHITE);
         botaoLogout.setFocusPainted(false);
         botaoLogout.setPreferredSize(new Dimension(150, 40));
-        botaoLogout.addActionListener(_ -> aoFecharJanela());
+        botaoLogout.addActionListener(z -> aoFecharJanela());
 
         // Criando um painel para centralizar o botão
         JPanel painelBotao = new JPanel(new GridBagLayout());
