@@ -6,11 +6,13 @@ import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 public class Controlador {
     private ConexaoTCP conexao;
     private Usuario usuario;
+    private Categoria[] categorias;
 
     public boolean conectar(String IP, int porta){
         if(this.conexao != null) return false;
@@ -66,36 +68,106 @@ public class Controlador {
         return gson.fromJson(jsonRecebido, Mensagem.class);
     }
 
-    public boolean cadastrar(String RA, String senha, String nome){
-        Mensagem requisicao = new Mensagem(1, RA, senha, nome, null, null, null);
+    public void cadastrarUsuario(String RA, String senha, String nome) throws Exception{
+        Mensagem requisicao = new Mensagem("1", RA, senha, nome, null);
         Mensagem resposta = this.requisitar(requisicao);
-        if(resposta == null) return false;
+        if(resposta == null) throw new Exception("Recebeu uma resposta inválida.");
 
-        // EDITAR PARA ANALISAR DEMAIS RESPONSES
-        return resposta.getResponse().equals("100");
+        if(!resposta.getResponse().equals("100")) throw new Exception(resposta.getMessage());
     }
 
-    // public boolean ler()            op3
-    // public boolean atualizar()      op4
-    // public boolean deletar()        op5
-
-    public boolean logar(String RA, String senha){
-        Mensagem requisicao = new Mensagem(5, RA, senha, null, null, null, null);
+    public void lerUsuario() throws Exception{
+        Mensagem requisicao = new Mensagem("2", this.usuario.getRA(), null, null, this.usuario.getToken());
         Mensagem resposta = this.requisitar(requisicao);
-        if(resposta == null) return false;
+        if(resposta == null) throw new Exception("Recebeu uma resposta inválida.");
 
-        String tipoUsuario = resposta.getResponse().substring(2);
-        if(!(tipoUsuario.equals("0") || tipoUsuario.equals("1"))) return false;
+        if(!resposta.getResponse().equals("110") && !resposta.getResponse().equals("111")) throw new Exception(resposta.getMessage());
+        this.usuario.setNome(resposta.getName());
+        this.usuario.setSenha(resposta.getPassword());
+    }
 
-        usuario = new Usuario(RA, "", resposta.getToken(), tipoUsuario.equals("1")); // Demais dados!?
-        return true;
+    public Usuario lerUsuario(String RA) throws Exception{
+        Mensagem requisicao = new Mensagem("2", RA, null, null, this.usuario.getToken());
+        Mensagem resposta = this.requisitar(requisicao);
+        if(resposta == null) throw new Exception("Recebeu uma resposta inválida.");
+
+        if(!resposta.getResponse().equals("110") && !resposta.getResponse().equals("111")) throw new Exception(resposta.getMessage());
+        return new Usuario(resposta.getUser(), resposta.getName(), resposta.getPassword(), null, resposta.getResponse().equals("111"));
+    }
+
+    public void editarUsuario(String RA, String nome, String senha) throws Exception{
+        Mensagem requisicao = new Mensagem("3", RA, senha, nome, this.usuario.getToken());
+        Mensagem resposta = this.requisitar(requisicao);
+        if(resposta == null) throw new Exception("Recebeu uma resposta inválida.");
+
+        if(!resposta.getResponse().equals("120")) throw new Exception(resposta.getMessage());
+    }
+
+    public void deletarUsuario(String RA) throws Exception{
+        Mensagem requisicao = new Mensagem("4", RA, null, null, this.usuario.getToken());
+        Mensagem resposta = this.requisitar(requisicao);
+        if(resposta == null) throw new Exception("Recebeu uma resposta inválida.");
+
+        if(!resposta.getResponse().equals("130")) throw new Exception(resposta.getMessage());
+    }
+
+    public void logar(String RA, String senha) throws Exception{
+        Mensagem requisicao = new Mensagem("5", RA, senha, null, null);
+        Mensagem resposta = this.requisitar(requisicao);
+        if(resposta == null) throw new Exception("Recebeu uma resposta inválida.");
+
+        boolean eAdmin = true;
+        switch(resposta.getResponse()){
+            case "000":
+                eAdmin = false;
+            case "001":
+                this.usuario = new Usuario(RA, "", "", resposta.getToken(), eAdmin);
+                lerUsuario();
+                break;
+            default:
+                throw new Exception(resposta.getMessage());
+        }
     }
 
     public void deslogar(){
-        this.requisitar(new Mensagem(6, null, null, null, usuario.getToken(), null, null));
+        this.requisitar(new Mensagem("6", null, null, null, usuario.getToken()));
     }
 
     public Usuario getUsuario() {
         return usuario;
+    }
+
+    public void cadastrarCategorias(Categoria[] cats) throws Exception{
+        Mensagem requisicao = new Mensagem("7", this.usuario.getToken(), cats, null);
+        Mensagem resposta = this.requisitar(requisicao);
+        if(resposta == null) throw new Exception("Recebeu uma resposta inválida.");
+
+        if(!resposta.getResponse().equals("200")) throw new Exception(resposta.getMessage());
+    }
+
+    public Categoria[] lerCategorias() throws Exception{
+        Mensagem requisicao = new Mensagem("8", this.usuario.getToken(), null, null);
+        Mensagem resposta = this.requisitar(requisicao);
+        if(resposta == null) throw new Exception("Recebeu uma resposta inválida.");
+
+        if(!resposta.getResponse().equals("210")) throw new Exception(resposta.getMessage());
+        this.categorias = resposta.getCategories();
+        return this.categorias;
+    }
+
+    public void editarCategorias(Categoria[] cats) throws Exception{
+        Mensagem requisicao = new Mensagem("9", this.usuario.getToken(), cats, null);
+        Mensagem resposta = this.requisitar(requisicao);
+        if(resposta == null) throw new Exception("Recebeu uma resposta inválida.");
+
+        if(!resposta.getResponse().equals("220")) throw new Exception(resposta.getMessage());
+    }
+
+    public void deletarCategorias(String[] ids) throws Exception{
+        Mensagem requisicao = new Mensagem("10", this.usuario.getToken(), null, ids);
+        Mensagem resposta = this.requisitar(requisicao);
+        if(resposta == null) throw new Exception("Recebeu uma resposta inválida.");
+
+        if(!resposta.getResponse().equals("230")) throw new Exception(resposta.getMessage());
     }
 }

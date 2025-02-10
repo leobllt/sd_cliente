@@ -3,12 +3,13 @@ package sd.cliente.backend;
 // @Author Leonardo Bellato
 
 public class Usuario {
-    private final String RA;
-    private final String nome;
-    private final String token;
-    private final boolean admin;
+    private String RA;
+    private String nome;
+    private String token;
+    private boolean admin;
+    private String senha;
 
-    public Usuario(String RA, String nome, String token, boolean admin) {
+    public Usuario(String RA, String nome, String senha, String token, boolean admin) {
         this.RA = RA;
         this.nome = nome;
         this.token = token;
@@ -21,6 +22,18 @@ public class Usuario {
 
     public String getNome() {
         return this.nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getSenha() {
+        return this.senha;
+    }
+
+    public void setSenha(String senha) {
+        this.senha = senha;
     }
 
     public String getToken() {

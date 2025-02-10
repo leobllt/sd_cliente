@@ -73,7 +73,7 @@ public class JanelaConexao{
     }
 
     // Interação com usuário
-    public boolean executar(){
+    public boolean conectar(){
         int opcao = JOptionPane.showConfirmDialog(null, this.painelPrincipal, "Dados do servidor",
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, (icon!=null) ? icon : null);
 

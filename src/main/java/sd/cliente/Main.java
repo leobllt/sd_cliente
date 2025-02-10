@@ -14,7 +14,7 @@ public class Main{
 
         // Iniciando conexão
         JanelaConexao janelaConexao = new JanelaConexao(controlador);
-        while(!janelaConexao.executar());
+        while(!janelaConexao.conectar());
         if(janelaConexao.cancelar){
             controlador.desconectar();
             System.exit(0);
@@ -22,11 +22,10 @@ public class Main{
         janelaConexao = null; // Desalocando
 
         // Autenticando
-        JanelaAutenticacao janelaAutenticacao = new JanelaAutenticacao(controlador);
-        if (janelaAutenticacao.ok())
+        new JanelaAutenticacao(controlador);
+
+        if (controlador.getUsuario() != null)
             new JanelaPrincipal(controlador); // Programa em si
 
-        janelaAutenticacao = null; // Desalocando
-        controlador.desconectar();
     }
 }
