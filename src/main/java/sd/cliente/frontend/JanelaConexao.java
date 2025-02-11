@@ -42,14 +42,16 @@ public class JanelaConexao{
         JLabel labelIP = new JLabel("IP:");
         labelIP.setFont(fonteComum);
 
+        this.inputIP = new JTextField(10);
+        this.inputIP.setFont(fonteComum);
+        this.inputIP.setText("127.0.0.1");
+
         JLabel labelPorta = new JLabel("Porta:");
         labelPorta.setFont(fonteComum);
 
-        this.inputIP = new JTextField(10);
-        this.inputIP.setFont(fonteComum);
-
         this.inputPorta = new JTextField(5);
         this.inputPorta.setFont(fonteComum);
+        this.inputPorta.setText("20000");
 
         this.painelPrincipal = new JPanel();
         this.painelPrincipal.setLayout(new GridLayout(2, 1, 5, 10));

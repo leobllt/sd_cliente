@@ -12,6 +12,7 @@ public class Usuario {
     public Usuario(String RA, String nome, String senha, String token, boolean admin) {
         this.RA = RA;
         this.nome = nome;
+        this.senha = senha;
         this.token = token;
         this.admin = admin;
     }
