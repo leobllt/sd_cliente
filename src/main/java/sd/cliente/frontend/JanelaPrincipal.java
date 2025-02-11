@@ -5,6 +5,8 @@ package sd.cliente.frontend;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
@@ -113,6 +115,7 @@ public class JanelaPrincipal extends JDialog {
             catch(Exception e){
                 JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
+            panel.requestFocusInWindow();
         });
 
         JButton btnEditar = new JButton("Editar");
@@ -133,11 +136,12 @@ public class JanelaPrincipal extends JDialog {
             catch(Exception e){
                 JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
+            panel.requestFocusInWindow();
         });
 
         JButton btnExcluir = new JButton("Excluir");
         btnExcluir.setFont(fontePrincipal);
-        btnExcluir.setBackground(new Color(0, 100, 255));
+        btnExcluir.setBackground(new Color(255, 0, 0));
         btnExcluir.setForeground(Color.WHITE);
         btnExcluir.setFocusPainted(false);
         btnExcluir.setPreferredSize(new Dimension(50, 30));
@@ -158,6 +162,7 @@ public class JanelaPrincipal extends JDialog {
             catch(Exception e){
                 JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
+            panel.requestFocusInWindow();
         });
 
         // Colocando componentes no painel com GridBagLayout
@@ -174,6 +179,18 @@ public class JanelaPrincipal extends JDialog {
         panel.add(btnExcluir, criarGBC(0, 6, 2, false));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
+        this.addKeyListener(new KeyListener() {
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+                    inputNome.setText("");
+                    inputRA.setText("");
+                    inputSenha.setText("");
+                    inputTipo.setText("");
+                }
+            }
+            public void keyReleased(KeyEvent e) {}
+            public void keyTyped(KeyEvent e) {}
+        });
         return panel;
     }
 
@@ -203,7 +220,10 @@ public class JanelaPrincipal extends JDialog {
         btnAtualizar.setFocusPainted(false);
         btnAtualizar.setEnabled(this.controlador.getUsuario().isAdmin());
         btnAtualizar.setPreferredSize(new Dimension(50, 30));
-        btnAtualizar.addActionListener(z -> { atualizarUI(); });
+        btnAtualizar.addActionListener(z -> {
+            JOptionPane.showMessageDialog(null, "Conteúdo atualizado.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            atualizarUI();
+        });
 
         JButton btnAdicionar = new JButton("Adicionar");
         btnAdicionar.setFont(fontePrincipal);
@@ -251,7 +271,7 @@ public class JanelaPrincipal extends JDialog {
             for(Categoria categoria : cats) atualizadas[i++] = JanelaCategoria.executar(categoria);
             try{
                 this.controlador.editarCategorias(Arrays.stream(atualizadas).filter(c -> c != null).toArray(Categoria[]::new));
-                JOptionPane.showMessageDialog(null, "Categoria(s) adicionada(s).", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Categoria(s) editadas(s).", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                 atualizarUI();
             }
             catch(Exception e){
@@ -261,7 +281,7 @@ public class JanelaPrincipal extends JDialog {
 
         JButton btnExcluir = new JButton("Excluir");
         btnExcluir.setFont(fontePrincipal);
-        btnExcluir.setBackground(new Color(0, 100, 255));
+        btnExcluir.setBackground(new Color(255, 0, 0));
         btnExcluir.setForeground(Color.WHITE);
         btnExcluir.setFocusPainted(false);
         btnExcluir.setEnabled(this.controlador.getUsuario().isAdmin());
