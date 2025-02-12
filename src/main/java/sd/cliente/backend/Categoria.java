@@ -26,6 +26,6 @@ public class Categoria {
 
     @Override
     public String toString(){
-        return id + " " + name + " " + description;
+        return name + ": " + description;
     }
 }

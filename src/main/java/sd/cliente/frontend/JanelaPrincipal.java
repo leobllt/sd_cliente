@@ -19,10 +19,9 @@ import sd.cliente.backend.Usuario;
 // Classe que permite logar e cadastrar
 public class JanelaPrincipal extends JDialog {
     private final Controlador controlador;
-    private List<Categoria> categorias;
-    private JList<Categoria> listaCategorias;
-    private DefaultListModel<Categoria> modelCategorias;
-    private JScrollPane categoriasPane;
+    private DefaultListModel<Categoria> modelCategorias = new DefaultListModel<>();;
+    private JList<Categoria> listaCategorias = new JList<>(modelCategorias);
+    private JScrollPane categoriasPane = new JScrollPane(listaCategorias);
 
     Font fontePrincipal;
     Font fonteSecundaria;
@@ -115,7 +114,6 @@ public class JanelaPrincipal extends JDialog {
             catch(Exception e){
                 JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
-            panel.requestFocusInWindow();
         });
 
         JButton btnEditar = new JButton("Editar");
@@ -136,7 +134,6 @@ public class JanelaPrincipal extends JDialog {
             catch(Exception e){
                 JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
-            panel.requestFocusInWindow();
         });
 
         JButton btnExcluir = new JButton("Excluir");
@@ -162,7 +159,6 @@ public class JanelaPrincipal extends JDialog {
             catch(Exception e){
                 JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
-            panel.requestFocusInWindow();
         });
 
         // Colocando componentes no painel com GridBagLayout
@@ -179,18 +175,6 @@ public class JanelaPrincipal extends JDialog {
         panel.add(btnExcluir, criarGBC(0, 6, 2, false));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        this.addKeyListener(new KeyListener() {
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_DELETE) {
-                    inputNome.setText("");
-                    inputRA.setText("");
-                    inputSenha.setText("");
-                    inputTipo.setText("");
-                }
-            }
-            public void keyReleased(KeyEvent e) {}
-            public void keyTyped(KeyEvent e) {}
-        });
         return panel;
     }
 
@@ -198,12 +182,7 @@ public class JanelaPrincipal extends JDialog {
         JPanel panel = new JPanel();
         panel.setLayout(new GridBagLayout());
 
-        modelCategorias = new DefaultListModel<>();
-
-        listaCategorias = new JList<>(modelCategorias);
         listaCategorias.setFont(new Font("Arial", Font.PLAIN, 14));
-
-        categoriasPane = new JScrollPane(listaCategorias);
         categoriasPane.setPreferredSize(new Dimension(250, 150));
         categoriasPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
@@ -336,7 +315,8 @@ public class JanelaPrincipal extends JDialog {
 
     private void atualizarUI(){
         try {
-            this.modelCategorias.clear();
+            if(this.modelCategorias != null)
+                this.modelCategorias.clear();
             for(Categoria c: this.controlador.lerCategorias()) this.modelCategorias.addElement(c);
             this.categoriasPane.updateUI();
         } catch(Exception e){
