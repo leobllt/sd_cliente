@@ -33,16 +33,17 @@ public class JanelaCategoria {
         JLabel labelNome = new JLabel("Nome:");
         labelNome.setFont(fonteComum);
 
-        this.inputNome = new JTextField(10);
+        this.inputNome = new JTextField(20);
         this.inputNome.setFont(fonteComum);
         this.inputNome.setText((nome != null) ? nome : "");
 
         JLabel labelDescricao = new JLabel("Descrição:");
         labelDescricao.setFont(fonteComum);
 
-        this.inputDescricao = new JTextField(5);
+        this.inputDescricao = new JTextField(20);
         this.inputDescricao.setFont(fonteComum);
         this.inputDescricao.setText((descricao != null) ? descricao : "");
+
 
         // Criando o painel principal com BoxLayout (vertical)
         this.painelPrincipal = new JPanel();
@@ -69,7 +70,7 @@ public class JanelaCategoria {
         else
             janelaCategoria = new JanelaCategoria(null, null);
 
-        int opcao = JOptionPane.showConfirmDialog(null, janelaCategoria.painelPrincipal, "Dados do servidor",
+        int opcao = JOptionPane.showConfirmDialog(null, janelaCategoria.painelPrincipal, "Dados da categoria",
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
 
         if (opcao == JOptionPane.OK_OPTION) {
@@ -78,7 +79,7 @@ public class JanelaCategoria {
                 categoria.setDescription(janelaCategoria.inputDescricao.getText());
                 return categoria;
             } else
-                return new Categoria(null, janelaCategoria.inputNome.getText(), janelaCategoria.inputDescricao.getText());
+                return new Categoria(null, janelaCategoria.inputNome.getText(), janelaCategoria.inputDescricao.getText(), null);
         }
         else
             return null;

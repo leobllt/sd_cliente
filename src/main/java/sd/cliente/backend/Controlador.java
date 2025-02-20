@@ -12,7 +12,6 @@ import java.util.concurrent.TimeoutException;
 public class Controlador {
     private ConexaoTCP conexao;
     private Usuario usuario;
-    private Categoria[] categorias;
 
     public boolean conectar(String IP, int porta){
         if(this.conexao != null) return false;
@@ -151,8 +150,7 @@ public class Controlador {
         if(resposta == null) throw new Exception("Recebeu uma resposta inválida.");
 
         if(!resposta.getResponse().equals("210")) throw new Exception(resposta.getMessage());
-        this.categorias = resposta.getCategories();
-        return this.categorias;
+        return resposta.getCategories();
     }
 
     public void editarCategorias(Categoria[] cats) throws Exception{
@@ -169,5 +167,54 @@ public class Controlador {
         if(resposta == null) throw new Exception("Recebeu uma resposta inválida.");
 
         if(!resposta.getResponse().equals("230")) throw new Exception(resposta.getMessage());
+    }
+
+    public void inscrever(String categoriaId) throws Exception{
+        Mensagem requisicao = new Mensagem("15", this.usuario.getToken(), null, null, categoriaId, null);
+        Mensagem resposta = this.requisitar(requisicao);
+        if(resposta == null) throw new Exception("Recebeu uma resposta inválida.");
+
+        if(!resposta.getResponse().equals("340")) throw new Exception(resposta.getMessage());
+    }
+
+    public void cancelarInscricao(String categoriaId) throws Exception{
+        Mensagem requisicao = new Mensagem("16", this.usuario.getToken(), null, null, categoriaId, null);
+        Mensagem resposta = this.requisitar(requisicao);
+        if(resposta == null) throw new Exception("Recebeu uma resposta inválida.");
+
+        if(!resposta.getResponse().equals("350")) throw new Exception(resposta.getMessage());
+    }
+
+    public Anuncio[] lerAnuncios() throws Exception{
+        Mensagem requisicao = new Mensagem("12", this.usuario.getToken(), null, null);
+        Mensagem resposta = this.requisitar(requisicao);
+        if(resposta == null) throw new Exception("Recebeu uma resposta inválida.");
+
+        if(!resposta.getResponse().equals("310")) throw new Exception(resposta.getMessage());
+        return resposta.getAnnouncements();
+    }
+
+    public void cadastrarAnuncio(Anuncio anuncio) throws Exception{
+        Mensagem requisicao = new Mensagem("11", this.usuario.getToken(), anuncio.getTitle(), anuncio.getText(), anuncio.getCategoriaId(), null);
+        Mensagem resposta = this.requisitar(requisicao);
+        if(resposta == null) throw new Exception("Recebeu uma resposta inválida.");
+
+        if(!resposta.getResponse().equals("300")) throw new Exception(resposta.getMessage());
+    }
+
+    public void editarAnuncio(Anuncio anuncio) throws Exception{
+        Mensagem requisicao = new Mensagem("13", this.usuario.getToken(), anuncio.getTitle(), anuncio.getText(), anuncio.getCategoriaId(), anuncio.getId());
+        Mensagem resposta = this.requisitar(requisicao);
+        if(resposta == null) throw new Exception("Recebeu uma resposta inválida.");
+
+        if(!resposta.getResponse().equals("320")) throw new Exception(resposta.getMessage());
+    }
+
+    public void deletarAnuncio(String id) throws Exception{
+        Mensagem requisicao = new Mensagem("14", this.usuario.getToken(), null, null, null, id);
+        Mensagem resposta = this.requisitar(requisicao);
+        if(resposta == null) throw new Exception("Recebeu uma resposta inválida.");
+
+        if(!resposta.getResponse().equals("330")) throw new Exception(resposta.getMessage());
     }
 }

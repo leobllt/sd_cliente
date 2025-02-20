@@ -5,13 +5,11 @@ package sd.cliente.frontend;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
-import java.util.List;
 
+import sd.cliente.backend.Anuncio;
 import sd.cliente.backend.Categoria;
 import sd.cliente.backend.Controlador;
 import sd.cliente.backend.Usuario;
@@ -22,6 +20,10 @@ public class JanelaPrincipal extends JDialog {
     private DefaultListModel<Categoria> modelCategorias = new DefaultListModel<>();;
     private JList<Categoria> listaCategorias = new JList<>(modelCategorias);
     private JScrollPane categoriasPane = new JScrollPane(listaCategorias);
+    private DefaultListModel<Anuncio> modelAnuncios = new DefaultListModel<>();;
+    private JList<Anuncio> listaAnuncios = new JList<>(modelAnuncios);
+    private JScrollPane anunciosPane = new JScrollPane(listaAnuncios);
+    private Categoria[] categoriasCache;
 
     Font fontePrincipal;
     Font fonteSecundaria;
@@ -53,8 +55,11 @@ public class JanelaPrincipal extends JDialog {
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setFont(new Font("Arial", Font.BOLD, 16));
         tabbedPane.setForeground(new Color(0, 100, 255));
+
+        JPanel painelCategorias = criarPainelCategorias();
+        tabbedPane.addTab("Anúncios", criarPainelAnuncios());
+        tabbedPane.addTab("Categorias", painelCategorias);
         tabbedPane.addTab("Conta", criarPainelDados());
-        tabbedPane.addTab("Categorias", criarPainelCategorias());
         this.setLayout(new BorderLayout());
         this.add(tabbedPane, BorderLayout.CENTER);
         this.pack();
@@ -197,11 +202,34 @@ public class JanelaPrincipal extends JDialog {
         btnAtualizar.setBackground(new Color(0, 100, 255));
         btnAtualizar.setForeground(Color.WHITE);
         btnAtualizar.setFocusPainted(false);
-        btnAtualizar.setEnabled(this.controlador.getUsuario().isAdmin());
         btnAtualizar.setPreferredSize(new Dimension(50, 30));
         btnAtualizar.addActionListener(z -> {
             JOptionPane.showMessageDialog(null, "Conteúdo atualizado.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-            atualizarUI();
+            atualizarCategoriasPane();
+        });
+
+        JButton btnInscrever = new JButton("Inscrever/Cancelar");
+        btnInscrever.setFont(fontePrincipal);
+        btnInscrever.setBackground(new Color(0, 100, 255));
+        btnInscrever.setForeground(Color.WHITE);
+        btnInscrever.setFocusPainted(false);
+        btnInscrever.setPreferredSize(new Dimension(50, 30));
+        btnInscrever.addActionListener(z -> {
+            Categoria categoria = this.listaCategorias.getSelectedValue();
+
+            try{
+                if(categoria == null) throw new Exception("Nenhuma categoria selecionada.");
+
+                if(categoria.getSubscribed().equals("true"))
+                    this.controlador.cancelarInscricao(categoria.getId());
+                else
+                    this.controlador.inscrever(categoria.getId());
+                JOptionPane.showMessageDialog(null, "Inscrito/Cancelado com sucesso.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                atualizarCategoriasPane();
+            }
+            catch(Exception e){
+                JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         JButton btnAdicionar = new JButton("Adicionar");
@@ -223,9 +251,13 @@ public class JanelaPrincipal extends JDialog {
                     if(res != null)
                         categorias[i] = res;
                 }
-                this.controlador.cadastrarCategorias(Arrays.stream(categorias).filter(c -> c != null).toArray(Categoria[]::new));
-                JOptionPane.showMessageDialog(null, "Categoria(s) adicionada(s).", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                atualizarUI();
+
+                Categoria[] temp = Arrays.stream(categorias).filter(c -> c != null).toArray(Categoria[]::new);
+                if(temp.length != 0) {
+                    this.controlador.cadastrarCategorias(temp);
+                    JOptionPane.showMessageDialog(null, "Categoria(s) adicionada(s).", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                    atualizarCategoriasPane();
+                }
             }
             catch (InterruptedException ex){}
             catch (NumberFormatException nfe){
@@ -244,14 +276,17 @@ public class JanelaPrincipal extends JDialog {
         btnEditar.setEnabled(this.controlador.getUsuario().isAdmin());
         btnEditar.setPreferredSize(new Dimension(50, 30));
         btnEditar.addActionListener(z -> {
-            Categoria[] cats = this.listaCategorias.getSelectedValuesList().toArray(new Categoria[this.listaCategorias.getSelectedValuesList().size()]);
-            Categoria[] atualizadas = new Categoria[cats.length];
-            int i = 0;
-            for(Categoria categoria : cats) atualizadas[i++] = JanelaCategoria.executar(categoria);
             try{
+                if(this.listaCategorias.getSelectedValuesList().isEmpty()) throw new Exception("Nenhuma categoria selecionada.");
+
+                Categoria[] cats = this.listaCategorias.getSelectedValuesList().toArray(new Categoria[this.listaCategorias.getSelectedValuesList().size()]);
+                Categoria[] atualizadas = new Categoria[cats.length];
+                int i = 0;
+                for(Categoria categoria : cats) atualizadas[i++] = JanelaCategoria.executar(categoria);
+
                 this.controlador.editarCategorias(Arrays.stream(atualizadas).filter(c -> c != null).toArray(Categoria[]::new));
                 JOptionPane.showMessageDialog(null, "Categoria(s) editadas(s).", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                atualizarUI();
+                atualizarCategoriasPane();
             }
             catch(Exception e){
                 JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
@@ -266,14 +301,18 @@ public class JanelaPrincipal extends JDialog {
         btnExcluir.setEnabled(this.controlador.getUsuario().isAdmin());
         btnExcluir.setPreferredSize(new Dimension(50, 30));
         btnExcluir.addActionListener(z -> {
-            Categoria[] cats = this.listaCategorias.getSelectedValuesList().toArray(new Categoria[this.listaCategorias.getSelectedValuesList().size()]);
-            String[] ids = new String[cats.length];
-            int i = 0;
-            for(Categoria cat: cats) ids[i++] = cat.getId();
+
             try{
+                if(this.listaCategorias.getSelectedValuesList().isEmpty()) throw new Exception("Nenhuma categoria selecionada.");
+
+                Categoria[] cats = this.listaCategorias.getSelectedValuesList().toArray(new Categoria[this.listaCategorias.getSelectedValuesList().size()]);
+                String[] ids = new String[cats.length];
+                int i = 0;
+                for(Categoria cat: cats) ids[i++] = cat.getId();
+
                 this.controlador.deletarCategorias(ids);
                 JOptionPane.showMessageDialog(null, "Categoria(s) deletada(s).", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                atualizarUI();
+                atualizarCategoriasPane();
             }
             catch(Exception e){
                 JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
@@ -283,12 +322,117 @@ public class JanelaPrincipal extends JDialog {
         // Colocando componentes no painel com GridBagLayout
         panel.add(categoriasPane, criarGBC(0, 0, 2, false));
         panel.add(btnAtualizar, criarGBC(0, 1, 2, false));
+        panel.add(btnInscrever, criarGBC(0, 2, 2, false));
+        panel.add(btnAdicionar, criarGBC(0, 3, 2, false));
+        panel.add(btnEditar, criarGBC(0, 4, 2, false));
+        panel.add(btnExcluir, criarGBC(0, 5, 2, false));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        atualizarCategoriasPane();
+
+        return panel;
+    }
+
+    private JPanel criarPainelAnuncios() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridBagLayout());
+
+        listaAnuncios.setFont(new Font("Arial", Font.PLAIN, 14));
+        anunciosPane.setPreferredSize(new Dimension(250, 150));
+        anunciosPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+
+        anunciosPane.setBorder(BorderFactory.createTitledBorder("Anuncios inscritos"));
+        // Get the existing TitledBorder and change its font size
+        TitledBorder titledBorder = (TitledBorder) anunciosPane.getBorder();
+        titledBorder.setTitleFont(new Font("Arial", Font.BOLD, 14));
+
+        // Botões
+        JButton btnAtualizar = new JButton("Atualizar");
+        btnAtualizar.setFont(fontePrincipal);
+        btnAtualizar.setBackground(new Color(0, 100, 255));
+        btnAtualizar.setForeground(Color.WHITE);
+        btnAtualizar.setFocusPainted(false);
+        btnAtualizar.setPreferredSize(new Dimension(50, 30));
+        btnAtualizar.addActionListener(z -> {
+            JOptionPane.showMessageDialog(null, "Conteúdo atualizado.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            atualizarAnunciosPane();
+        });
+
+        JButton btnAdicionar = new JButton("Adicionar");
+        btnAdicionar.setFont(fontePrincipal);
+        btnAdicionar.setBackground(new Color(0, 100, 255));
+        btnAdicionar.setForeground(Color.WHITE);
+        btnAdicionar.setFocusPainted(false);
+        btnAdicionar.setEnabled(this.controlador.getUsuario().isAdmin());
+        btnAdicionar.setPreferredSize(new Dimension(50, 30));
+        btnAdicionar.addActionListener(z -> {
+            try{
+                if(this.categoriasCache == null || this.categoriasCache.length == 0) throw new Exception("Nenhuma categoria cadastrada.");
+                Anuncio res = JanelaAnuncio.executar(null, this.categoriasCache);
+                if(res != null) {
+                    this.controlador.cadastrarAnuncio(res);
+                    JOptionPane.showMessageDialog(null, "Anúncio adicionado.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                    atualizarAnunciosPane();
+                }
+            }
+            catch(Exception e){
+                JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        JButton btnEditar = new JButton("Editar");
+        btnEditar.setFont(fontePrincipal);
+        btnEditar.setBackground(new Color(0, 100, 255));
+        btnEditar.setForeground(Color.WHITE);
+        btnEditar.setFocusPainted(false);
+        btnEditar.setEnabled(this.controlador.getUsuario().isAdmin());
+        btnEditar.setPreferredSize(new Dimension(50, 30));
+        btnEditar.addActionListener(z -> {
+            Anuncio anuncio = this.listaAnuncios.getSelectedValue();
+            try{
+                if(anuncio == null) throw new Exception("Nenhum anuncio cadastrado.");
+
+                anuncio = JanelaAnuncio.executar(anuncio, this.categoriasCache);
+                this.controlador.editarAnuncio(anuncio);
+                JOptionPane.showMessageDialog(null, "Anúncio editado.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                atualizarAnunciosPane();
+            }
+            catch(Exception e){
+                JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        JButton btnExcluir = new JButton("Excluir");
+        btnExcluir.setFont(fontePrincipal);
+        btnExcluir.setBackground(new Color(255, 0, 0));
+        btnExcluir.setForeground(Color.WHITE);
+        btnExcluir.setFocusPainted(false);
+        btnExcluir.setEnabled(this.controlador.getUsuario().isAdmin());
+        btnExcluir.setPreferredSize(new Dimension(50, 30));
+        btnExcluir.addActionListener(z -> {
+            Anuncio anuncio = this.listaAnuncios.getSelectedValue();
+
+            try{
+                if(anuncio == null) throw new Exception("Nenhum anuncio cadastrado.");
+
+                this.controlador.deletarAnuncio(anuncio.getId());
+                JOptionPane.showMessageDialog(null, "Anúncio deletado.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                atualizarAnunciosPane();
+            }
+            catch(Exception e){
+                JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        // Colocando componentes no painel com GridBagLayout
+        panel.add(anunciosPane, criarGBC(0, 0, 2, false));
+        panel.add(btnAtualizar, criarGBC(0, 1, 2, false));
         panel.add(btnAdicionar, criarGBC(0, 2, 2, false));
         panel.add(btnEditar, criarGBC(0, 3, 2, false));
         panel.add(btnExcluir, criarGBC(0, 4, 2, false));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        if(this.controlador.getUsuario().isAdmin()) atualizarUI();
+        atualizarAnunciosPane();
 
         return panel;
     }
@@ -313,12 +457,34 @@ public class JanelaPrincipal extends JDialog {
         return gbc;
     }
 
-    private void atualizarUI(){
+    private void atualizarAnunciosPane(){
         try {
-            if(this.modelCategorias != null)
+            if(this.modelAnuncios != null && !this.modelAnuncios.isEmpty())
+                this.modelAnuncios.clear();
+
+            Anuncio[] anuncios = this.controlador.lerAnuncios();
+            if(anuncios != null && anuncios.length > 0){
+                for(Anuncio a: anuncios) {
+                    a.setCategoriaNome(Arrays.stream(this.categoriasCache).filter((c) -> c.getId().equals(a.getCategoriaId())).findFirst().get().getName());
+                    this.modelAnuncios.addElement(a);
+                }
+                this.anunciosPane.updateUI();
+            }
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void atualizarCategoriasPane(){
+        try {
+            if(this.modelCategorias != null && !this.modelCategorias.isEmpty())
                 this.modelCategorias.clear();
-            for(Categoria c: this.controlador.lerCategorias()) this.modelCategorias.addElement(c);
-            this.categoriasPane.updateUI();
+
+            this.categoriasCache = this.controlador.lerCategorias();
+            if(this.categoriasCache != null && this.categoriasCache.length > 0){
+                for(Categoria c: categoriasCache) this.modelCategorias.addElement(c);
+                this.categoriasPane.updateUI();
+            }
         } catch(Exception e){
             JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }

@@ -14,6 +14,11 @@ public class Mensagem {
     private String message;
     private Categoria[] categories;
     private String[] categoryIds;
+    private String title;
+    private String text;
+    private String categoryId;
+    private Anuncio[] announcements;
+    private String id;
 
     public Mensagem(String op, String user, String password, String name, String token) {
         this.op = op;
@@ -28,6 +33,15 @@ public class Mensagem {
         this.token = token;
         this.categories = categories;
         this.categoryIds = categoryIds;
+    }
+
+    public Mensagem(String op, String token, String title, String text, String categoryId, String id){
+        this.op = op;
+        this.token = token;
+        this.title = title;
+        this.text = text;
+        this.categoryId = categoryId;
+        this.id = id;
     }
 
     public String getOp() {
@@ -70,4 +84,19 @@ public class Mensagem {
 
     public String[] getCategoryIds() { return this.categoryIds; }
     public void setCategoryIds(String[] categoryIds) { this.categoryIds = categoryIds; }
+
+    public String getTitle() { return this.title; }
+    public void setTitle(String title) { this.title = title; }
+
+    public String getText() { return this.text; }
+    public void setText(String text) { this.text = text; }
+
+    public String getCategoryId() { return this.categoryId; }
+    public void setCategoryId(String categoryId) { this.categoryId = categoryId; }
+
+    public Anuncio[] getAnnouncements() { return this.announcements; }
+    public void setAnnouncements(Anuncio[] announcements) { this.announcements = announcements; }
+
+    public String getId() { return this.id; }
+    public void setId(String id) { this.id = id; }
 }
